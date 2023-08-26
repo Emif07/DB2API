@@ -1,29 +1,39 @@
-class {{ table_name.capitalize() }}:
-    """
-    Represents the {{ table_name }} table in the database.
-    """
-{% for column, column_type in columns %}
-    {% set python_type = column_type|sql_to_python %}  {# Assuming a custom filter to convert SQL types to Python #}
-    {{ column }}: {{ python_type }}  {# type hinting #}
-    {% if column in primary_keys %}
-    # This is a primary key.
-    {% endif %}
-    {% for fk_table, fk_column in foreign_keys %}
-    {% if fk_column == column %}
-    # Foreign key referencing {{ fk_table }} table.
-    {% endif %}
-    {% endfor %}
-{% endfor %}
+from sqlalchemy import Column, String, UUID, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import func
+import uuid
+
+Base = declarative_base()
+
+class {{ table_name.capitalize() }}(Base):
+    __tablename__ = '{{ table_name }}'
+
+    {% for column, data_type, is_nullable, column_default in columns -%}
+    {{ column }} = Column({{ map_sqlalchemy_type(data_type) }}
+    {%- if column in primary_keys %}, primary_key=True{% endif -%}
+    {% if is_nullable == 'NO' %}, nullable=False{% endif -%}
+    {% if column_default == 'gen_random_uuid()' -%}, default=uuid.uuid4{% elif column_default == 'CURRENT_TIMESTAMP' -%}, default=func.now(){% elif column_default %}, default={{ column_default }}{% endif -%}
+    {% if column == 'updated_at' -%}, onupdate=func.now(){% endif -%}
+    {% if column in foreign_keys -%}, ForeignKey('{{ foreign_keys[column] }}'){% endif -%})
+    {% endfor -%}
+
+    {%- for fk_column, ref in foreign_keys.items() %}
+    {% set foreign_table, foreign_column = ref.split('.') -%}
+    {{ fk_column }}_relation = relationship("{{ foreign_table.capitalize() }}")
+    {%- endfor %}
 
     def __repr__(self):
-        return f"<{{ table_name.capitalize() }}({', '.join([f'{column}={{self.{column}}}' for column, _ in columns])})>"
+        return "<{{ table_name.capitalize() }}({{ repr_string }})>"
 
     def __str__(self):
-        return f"{{ table_name.capitalize() }}({', '.join([f'{column}={{self.{column}}}' for column, _ in columns])})"
+        return str(self.__dict__)
 
     def to_dict(self):
         return {
-            {% for column, _ in columns %}
+            {%- for column, _, _, _ in columns -%}
             "{{ column }}": self.{{ column }},
-            {% endfor %}
+            {% endfor -%}
         }
+
+        

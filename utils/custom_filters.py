@@ -1,8 +1,10 @@
-def sql_to_python(data_type: str) -> str:
+def map_sqlalchemy_type(pg_type: str) -> str:
     mapping = {
-        "integer": "int",
-        "text": "str",
-        "timestamp without time zone": "datetime.datetime",
-        # ... add other mappings as needed
+        "uuid": "UUID",
+        "character varying": "String",
+        "varchar": "String",
+        "timestamp with time zone": "DateTime(timezone=True)",
+        "integer": "Integer",
+        # ... add more mappings as required
     }
-    return mapping.get(data_type, "Any")  # Default to 'Any' if type is not recognized
+    return mapping.get(pg_type, "String")  # Default to String if type not found
