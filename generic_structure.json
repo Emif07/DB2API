@@ -1,0 +1,14 @@
+{
+    "api-project": {
+        "models": ["<ENTITY>.model.js"],
+        "repositories": ["<ENTITY>.repository.js"],
+        "services": ["<ENTITY>.service.js"],
+        "controllers": ["<ENTITY>.controller.js"],
+        "dto": ["<ENTITY>.dto.js"],
+        "middleware": ["authentication.middleware.js"],
+        "config": ["database.config.js"],
+        "utils": ["date.utils.js"],
+        "tests": ["<ENTITY>.test.js"],
+        "docs": ["swagger.yaml"]
+    }
+}
