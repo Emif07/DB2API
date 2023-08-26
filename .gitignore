@@ -18,3 +18,4 @@ env/
 # IDE-specific (e.g., for VSCode and PyCharm)
 .vscode/
 .idea/
+.DS_STORE
