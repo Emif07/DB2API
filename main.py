@@ -82,9 +82,13 @@ def main():
                 logging.warning("Failed to connect with the provided database configuration.")
 
     logging.info("Database configuration is set!")
-    # Step 3: Connect to the database and fetch metadata (tables, columns, primary keys, and foreign keys).
-    # Step 4: Create directories like models, repositories, services, controllers, etc. (Refer to the generic_structure.json)
-    # Step 5: Prompt user to for a table name to generate files. Validate the entered table name if exists. 
+    # TODO: Create generic structure for the project (Refer to the generic_structure.json)
+
+    # TODO: Prompt user ask for a table name to generate it's files. 
+
+    # TODO: Validate the entered table name if exists. 
+    
+    # TODO fetch metadata (column names and types, primary keys, and foreign keys).
 
 if __name__ == "__main__":
     main()
