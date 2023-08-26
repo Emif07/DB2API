@@ -1,0 +1,29 @@
+class {{ table_name.capitalize() }}:
+    """
+    Represents the {{ table_name }} table in the database.
+    """
+{% for column, column_type in columns %}
+    {% set python_type = column_type|sql_to_python %}  {# Assuming a custom filter to convert SQL types to Python #}
+    {{ column }}: {{ python_type }}  {# type hinting #}
+    {% if column in primary_keys %}
+    # This is a primary key.
+    {% endif %}
+    {% for fk_table, fk_column in foreign_keys %}
+    {% if fk_column == column %}
+    # Foreign key referencing {{ fk_table }} table.
+    {% endif %}
+    {% endfor %}
+{% endfor %}
+
+    def __repr__(self):
+        return f"<{{ table_name.capitalize() }}({', '.join([f'{column}={{self.{column}}}' for column, _ in columns])})>"
+
+    def __str__(self):
+        return f"{{ table_name.capitalize() }}({', '.join([f'{column}={{self.{column}}}' for column, _ in columns])})"
+
+    def to_dict(self):
+        return {
+            {% for column, _ in columns %}
+            "{{ column }}": self.{{ column }},
+            {% endfor %}
+        }
