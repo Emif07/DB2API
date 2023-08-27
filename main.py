@@ -1,8 +1,7 @@
-from core import db_info_manager
+from core import save_db_info, load_db_info
 from core.db_connector import DatabaseConnector
-from core.structure_generator import generate_api_structure_for_table, update_model_init_file
+from core.structure_generator import generate_api_structure_for_table
 from utils.file_manager import create_project_folder
-from core.db_info_manager import save_db_info, load_db_info
 import psycopg2
 import os
 import logging
@@ -109,8 +108,6 @@ def main():
     if user_choice in ['y', 'yes']:
         for table_name in available_tables:
             generate_api_structure_for_table(db_info, table_name, project_name)
-            update_model_init_file(project_name, table_name.capitalize())
-
             logging.info(f"API structure for table '{table_name}' has been successfully generated!")
     else:
         table_name = input(
@@ -122,7 +119,6 @@ def main():
         else:
             # Generate structure for the table
             generate_api_structure_for_table(db_info, table_name, project_name)
-            update_model_init_file(project_name, table_name.capitalize())
             logging.info(f"Structure for table '{table_name}' has been successfully generated!")
 
 if __name__ == "__main__":

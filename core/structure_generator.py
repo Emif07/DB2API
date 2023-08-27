@@ -41,12 +41,55 @@ def render_and_save(category: str, table_name: str, project_name: str, context: 
     write_file(path, rendered_content)
     logging.debug(f"{category.capitalize()} for table {table_name} saved at {path}")
 
+def update_init_file(project_name: str, directory_name: str, item_name: str, import_pattern: str):
+    """
+    Updates the __init__.py file in the given directory with an import based on the provided pattern.
+    """
+    # Convert table_name (like tournament_rankings) to ClassName (like TournamentRankings)
+    class_name = ''.join(word.capitalize() for word in item_name.split('_'))
+    
+    init_path = f"projects/{project_name}/{directory_name}/__init__.py"
+    new_import = import_pattern.format(item_name.lower(), class_name)
+
+    # If the file doesn't exist, create it
+    if not os.path.exists(init_path):
+        with open(init_path, 'w') as f:
+            f.write(f"# Auto-generated __init__.py for {directory_name}\n")
+
+    # Read the existing content
+    with open(init_path, 'r') as f:
+        content = f.readlines()
+
+    # If the new import already exists, no need to update
+    if new_import + "\n" in content:
+        logging.debug(f"{class_name} is already present in __init__.py of {directory_name}.")
+        return
+
+    # Remove existing __all__ declaration
+    content = [line for line in content if not line.startswith("__all__")]
+
+    # Append the new import
+    content.append(new_import + "\n")
+
+    # Extracting existing names
+    item_names = [line.split()[3] for line in content if line.startswith("from .") and line.split()[3] not in ["'", ","]]
+
+    # Ensure no duplicates
+    item_names = list(set(item_names))
+
+    # Add the updated __all__ declaration
+    all_declaration = "__all__ = [" + ", ".join([f"'{name}'" for name in item_names]) + "]"
+    content.append(all_declaration + "\n")
+
+    # Write the updated content back to __init__.py
+    with open(init_path, 'w') as f:
+        f.writelines(content)
+
+    logging.debug(f"Updated __init__.py for {class_name} in {directory_name} at {init_path}")
+
 # ============================
 # Model Generation
 # ============================
-
-# List to store generated model names
-generated_models = []
 
 def generate_model_for_table(db_info: Dict[str, str], table_name: str, project_name: str, template_type: str = "default"):
     logging.debug(f"Generating model for table {table_name} in project {project_name} using {template_type} template")
@@ -106,51 +149,8 @@ def generate_model_for_table(db_info: Dict[str, str], table_name: str, project_n
 
     render_and_save("model", table_name, project_name, context, template_type)
 
-    # Append the model name to generated_models list
-    generated_models.append(table_name.capitalize())
-
-def update_model_init_file(project_name: str, new_model_name: str):
-    """
-    Updates the __init__.py file in the models directory with an import for the new model.
-    """
-    init_path = f"projects/{project_name}/models/__init__.py"
-    new_import = f"from .{new_model_name.lower()}_model import {new_model_name}"
-
-    # If the file doesn't exist, create it
-    if not os.path.exists(init_path):
-        with open(init_path, 'w') as f:
-            f.write("# Auto-generated __init__.py for models\n")
-
-    # Read the existing content
-    with open(init_path, 'r') as f:
-        content = f.readlines()
-
-    # If the new import already exists, no need to update
-    if new_import + "\n" in content:
-        logging.info(f"Model {new_model_name} is already present in __init__.py.")
-        return
-
-    # Remove existing __all__ declaration
-    content = [line for line in content if not line.startswith("__all__")]
-
-    # Append the new model import
-    content.append(new_import + "\n")
-
-    # Extracting existing model names
-    model_names = [line.split()[3] for line in content if line.startswith("from .") and line.split()[3] not in ["'", ","]]
-
-    # Ensure no duplicates
-    model_names = list(set(model_names))
-
-    # Add the updated __all__ declaration
-    all_declaration = "__all__ = [" + ", ".join([f"'{model_name}'" for model_name in model_names]) + "]"
-    content.append(all_declaration + "\n")
-
-    # Write the updated content back to __init__.py
-    with open(init_path, 'w') as f:
-        f.writelines(content)
-
-    logging.info(f"Updated __init__.py for model {new_model_name} at {init_path}")
+    # Update the __init__.py file
+    update_init_file(project_name, "models", table_name.capitalize(), "from .{}_model import {}")
 
 # ============================
 # Controller Generation
@@ -161,6 +161,8 @@ def generate_controller_for_table(table_name: str, project_name: str, template_t
     
     context = basic_context(table_name)
     render_and_save("controller", table_name, project_name, context, template_type)
+    # Update the __init__.py file
+    update_init_file(project_name, "controllers", table_name.capitalize(), "from .{}_controller import {}Controller")
 
 # ============================
 # Repository Generation
@@ -171,6 +173,8 @@ def generate_repository_for_table(table_name: str, project_name: str, template_t
 
     context = basic_context(table_name)
     render_and_save("repository", table_name, project_name, context, template_type)
+    # Update the __init__.py file with the new repository
+    update_init_file(project_name, "repositories", table_name.capitalize(), "from .{}_repository import {}Repository")
 
 # ============================
 # Service Generation
@@ -181,6 +185,8 @@ def generate_service_for_table(table_name: str, project_name: str, template_type
 
     context = basic_context(table_name)
     render_and_save("service", table_name, project_name, context, template_type)
+    # Update the __init__.py file
+    update_init_file(project_name, "services", table_name.capitalize(), "from .{}_service import {}Service")
 
 # ============================
 # API Structure Generation

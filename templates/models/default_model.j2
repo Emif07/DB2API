@@ -6,7 +6,7 @@ import uuid
 
 Base = declarative_base()
 
-class {{ table_name.capitalize() }}(Base):
+class {{ table_name.split('_')|map('capitalize')|join('') }}(Base):
     __tablename__ = '{{ table_name }}'
 
     {% for column, data_type, is_nullable, column_default in columns -%}

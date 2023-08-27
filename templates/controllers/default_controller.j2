@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request
-from services import {{ table_name.capitalize() }}Service  # Import the generated service
+from services import {{ table_name.split('_')|map('capitalize')|join('') }}Service  # Import the generated service
 
 {{ table_name_lower }}_bp = Blueprint('{{ table_name_lower }}', __name__)
-{{ table_name_lower }}_service = {{ table_name.capitalize() }}Service()
+{{ table_name_lower }}_service = {{ table_name.split('_')|map('capitalize')|join('') }}Service()
 
 @{{ table_name_lower }}_bp.route('/', methods=['GET'])
 def get_all():

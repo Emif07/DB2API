@@ -1,4 +1,4 @@
-class {{ table_name.capitalize() }}Service:
+class {{ table_name.split('_')|map('capitalize')|join('') }}Service:
 
     def __init__(self, repository):
         self.repository = repository
