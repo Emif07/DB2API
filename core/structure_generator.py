@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 from core import DatabaseConnector
 from utils import write_file, render_template
@@ -43,6 +44,9 @@ def render_and_save(category: str, table_name: str, project_name: str, context: 
 # ============================
 # Model Generation
 # ============================
+
+# List to store generated model names
+generated_models = []
 
 def generate_model_for_table(db_info: Dict[str, str], table_name: str, project_name: str, template_type: str = "default"):
     logging.debug(f"Generating model for table {table_name} in project {project_name} using {template_type} template")
@@ -102,6 +106,52 @@ def generate_model_for_table(db_info: Dict[str, str], table_name: str, project_n
 
     render_and_save("model", table_name, project_name, context, template_type)
 
+    # Append the model name to generated_models list
+    generated_models.append(table_name.capitalize())
+
+def update_model_init_file(project_name: str, new_model_name: str):
+    """
+    Updates the __init__.py file in the models directory with an import for the new model.
+    """
+    init_path = f"projects/{project_name}/models/__init__.py"
+    new_import = f"from .{new_model_name.lower()}_model import {new_model_name}"
+
+    # If the file doesn't exist, create it
+    if not os.path.exists(init_path):
+        with open(init_path, 'w') as f:
+            f.write("# Auto-generated __init__.py for models\n")
+
+    # Read the existing content
+    with open(init_path, 'r') as f:
+        content = f.readlines()
+
+    # If the new import already exists, no need to update
+    if new_import + "\n" in content:
+        logging.info(f"Model {new_model_name} is already present in __init__.py.")
+        return
+
+    # Remove existing __all__ declaration
+    content = [line for line in content if not line.startswith("__all__")]
+
+    # Append the new model import
+    content.append(new_import + "\n")
+
+    # Extracting existing model names
+    model_names = [line.split()[3] for line in content if line.startswith("from .") and line.split()[3] not in ["'", ","]]
+
+    # Ensure no duplicates
+    model_names = list(set(model_names))
+
+    # Add the updated __all__ declaration
+    all_declaration = "__all__ = [" + ", ".join([f"'{model_name}'" for model_name in model_names]) + "]"
+    content.append(all_declaration + "\n")
+
+    # Write the updated content back to __init__.py
+    with open(init_path, 'w') as f:
+        f.writelines(content)
+
+    logging.info(f"Updated __init__.py for model {new_model_name} at {init_path}")
+
 # ============================
 # Controller Generation
 # ============================
@@ -141,7 +191,7 @@ def generate_api_structure_for_table(db_info: Dict[str, str], table_name: str, p
 
     # Generate model for the table
     generate_model_for_table(db_info, table_name, project_name)
-    
+
     # Generate controller for the table
     generate_controller_for_table(table_name, project_name)
 
@@ -150,3 +200,4 @@ def generate_api_structure_for_table(db_info: Dict[str, str], table_name: str, p
 
     # Generate service for the table
     generate_service_for_table(table_name, project_name)
+
