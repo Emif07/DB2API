@@ -1,0 +1,21 @@
+class {{ table_name.capitalize() }}Service:
+
+    def __init__(self, repository):
+        self.repository = repository
+
+    def get_all(self):
+        return self.repository.get_all()
+
+    def get_by_id(self, id):
+        return self.repository.get_by_id(id)
+
+    def create(self, data):
+        # Additional business logic can be added here
+        return self.repository.create(data)
+
+    def update(self, id, data):
+        # Additional business logic can be added here
+        return self.repository.update(id, data)
+
+    def delete(self, id):
+        return self.repository.delete(id)

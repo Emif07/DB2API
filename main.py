@@ -1,6 +1,6 @@
 from core import db_info_manager
 from core.db_connector import DatabaseConnector
-from core.structure_generator import generate_model_for_table
+from core.structure_generator import generate_api_structure_for_table
 from utils.file_manager import create_project_folder
 from core.db_info_manager import save_db_info, load_db_info
 import psycopg2
@@ -9,7 +9,6 @@ import logging
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)
-
 
 def prompt_for_project_name():
     while True:
@@ -99,7 +98,7 @@ def main():
 
     # Prompt user for table name or if they want to generate for all tables
     user_choice = input(
-        "Do you want to generate models for all tables? (yes/no): "
+        "Do you want to generate structure for all tables? (yes/no): "
     ).strip().lower()
 
     connector = DatabaseConnector(db_info)
@@ -110,23 +109,19 @@ def main():
 
     if user_choice in ['y', 'yes']:
         for table_name in available_tables:
-            generate_model_for_table(db_info, table_name, project_name)
-            logging.info(f"Model for table '{table_name}' has been successfully generated!")
+            generate_api_structure_for_table(db_info, table_name, project_name)
+            logging.info(f"API structure for table '{table_name}' has been successfully generated!")
     else:
         table_name = input(
-            "Please enter the name of the table for which you want to generate a model: "
+            "Please enter the name of the table for which you want to generate a structure: "
         ).strip()
 
         if table_name not in available_tables:
             logging.warning(f"The table '{table_name}' does not exist in the specified database.")
         else:
-            # Generate model for the table
-            generate_model_for_table(db_info, table_name, project_name)
-            logging.info(f"Model for table '{table_name}' has been successfully generated!")
-
-    # TODO: Validate the entered table name if exists.
-
-    # TODO fetch metadata (column names and types, primary keys, and foreign keys).
+            # Generate structure for the table
+            generate_api_structure_for_table(db_info, table_name, project_name)
+            logging.info(f"Structure for table '{table_name}' has been successfully generated!")
 
 if __name__ == "__main__":
     main()

@@ -1,0 +1,50 @@
+from flask import Blueprint, jsonify, request
+from services import {{ table_name.capitalize() }}Service  # Import the generated service
+
+{{ table_name_lower }}_bp = Blueprint('{{ table_name_lower }}', __name__)
+{{ table_name_lower }}_service = {{ table_name.capitalize() }}Service()
+
+@{{ table_name_lower }}_bp.route('/', methods=['GET'])
+def get_all():
+    page = request.args.get('page', default=None, type=int)
+    per_page = request.args.get('per_page', default=None, type=int)
+    
+    if page and per_page:
+        items, total = {{ table_name_lower }}_service.get_all(page, per_page)
+        return jsonify({
+            "items": [item.to_dict() for item in items],
+            "total": total,
+            "page": page,
+            "per_page": per_page
+        })
+    else:
+        items = {{ table_name_lower }}_service.get_all()
+        return jsonify([item.to_dict() for item in items])
+
+@{{ table_name_lower }}_bp.route('/<int:id>', methods=['GET'])
+def get_by_id(id):
+    item = {{ table_name_lower }}_service.get_by_id(id)
+    if not item:
+        return jsonify({"message": "Not Found"}), 404
+    return jsonify(item.to_dict())
+
+@{{ table_name_lower }}_bp.route('/', methods=['POST'])
+def create():
+    data = request.json
+    new_item = {{ table_name_lower }}_service.create(data)
+    return jsonify(new_item.to_dict()), 201
+
+@{{ table_name_lower }}_bp.route('/<int:id>', methods=['PUT'])
+def update(id):
+    data = request.json
+    updated_item = {{ table_name_lower }}_service.update(id, data)
+    if not updated_item:
+        return jsonify({"message": "Not Found"}), 404
+    return jsonify(updated_item.to_dict())
+
+@{{ table_name_lower }}_bp.route('/<int:id>', methods=['DELETE'])
+def delete(id):
+    success = {{ table_name_lower }}_service.delete(id)
+    if not success:
+        return jsonify({"message": "Not Found or couldn't delete"}), 404
+    return jsonify({"message": "Deleted successfully"})
