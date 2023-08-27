@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, UUID, ForeignKey, DateTime
+from sqlalchemy import Column, String, Integer, UUID, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import func
@@ -12,10 +12,11 @@ class {{ table_name.capitalize() }}(Base):
     {% for column, data_type, is_nullable, column_default in columns -%}
     {{ column }} = Column({{ map_sqlalchemy_type(data_type) }}
     {%- if column in primary_keys %}, primary_key=True{% endif -%}
-    {% if is_nullable == 'NO' %}, nullable=False{% endif -%}
     {% if column_default == 'gen_random_uuid()' -%}, default=uuid.uuid4{% elif column_default == 'CURRENT_TIMESTAMP' -%}, default=func.now(){% elif column_default %}, default={{ column_default }}{% endif -%}
     {% if column == 'updated_at' -%}, onupdate=func.now(){% endif -%}
-    {% if column in foreign_keys -%}, ForeignKey('{{ foreign_keys[column] }}'){% endif -%})
+    {% if column in foreign_keys -%}, ForeignKey('{{ foreign_keys[column] }}'){% endif -%}
+    {% if is_nullable == 'NO' %}, nullable=False{% endif -%}
+    )
     {% endfor -%}
 
     {%- for fk_column, ref in foreign_keys.items() %}

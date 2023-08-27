@@ -97,25 +97,32 @@ def main():
 
     logging.info("Database configuration is set!")
 
-    # TODO: Create generic structure for the project (Refer to the generic_structure.json)
+    # Prompt user for table name or if they want to generate for all tables
+    user_choice = input(
+        "Do you want to generate models for all tables? (yes/no): "
+    ).strip().lower()
 
-    # Prompt user for table name
-    table_name = input(
-        "Please enter the name of the table for which you want to generate a model: "
-    ).strip()
-
-    # Validate if the table exists in the database
     connector = DatabaseConnector(db_info)
     tables_query = (
         "SELECT table_name FROM information_schema.tables WHERE table_schema='public';"
     )
     available_tables = [row[0] for row in connector.execute_query(tables_query)]
-    if table_name not in available_tables:
-        print(f"The table '{table_name}' does not exist in the specified database.")
+
+    if user_choice in ['y', 'yes']:
+        for table_name in available_tables:
+            generate_model_for_table(db_info, table_name, project_name)
+            logging.info(f"Model for table '{table_name}' has been successfully generated!")
     else:
-        # Generate model for the table
-        generate_model_for_table(db_info, table_name, project_name)
-        print(f"Model for table '{table_name}' has been successfully generated!")
+        table_name = input(
+            "Please enter the name of the table for which you want to generate a model: "
+        ).strip()
+
+        if table_name not in available_tables:
+            logging.warning(f"The table '{table_name}' does not exist in the specified database.")
+        else:
+            # Generate model for the table
+            generate_model_for_table(db_info, table_name, project_name)
+            logging.info(f"Model for table '{table_name}' has been successfully generated!")
 
     # TODO: Validate the entered table name if exists.
 
