@@ -1,23 +1,27 @@
-from sqlalchemy import Column, String, Integer, UUID, ForeignKey, DateTime
+from sqlalchemy import Column, String, Numeric, Integer, UUID, ForeignKey, DateTime, Enum, func
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import func
+from app.database.extensions import db
 import uuid
 
-Base = declarative_base()
+{%- for enum_name, enum_data in enums.items() %}
+{{ enum_data.definition }}
+{% endfor %}
 
-class {{ table_name.split('_')|map('capitalize')|join('') }}(Base):
+class {{ table_name.split('_')|map('capitalize')|join('') }}(db.Model):
     __tablename__ = '{{ table_name }}'
 
     {% for column, data_type, is_nullable, column_default in columns -%}
-    {{ column }} = Column({{ map_sqlalchemy_type(data_type) }}
-    {%- if column in primary_keys %}, primary_key=True{% endif -%}
-    {% if column_default == 'gen_random_uuid()' -%}, default=uuid.uuid4{% elif column_default == 'CURRENT_TIMESTAMP' -%}, default=func.now(){% elif column_default %}, default={{ column_default }}{% endif -%}
-    {% if column == 'updated_at' -%}, onupdate=func.now(){% endif -%}
-    {% if column in foreign_keys -%}, ForeignKey('{{ foreign_keys[column] }}'){% endif -%}
-    {% if is_nullable == 'NO' %}, nullable=False{% endif -%}
-    )
-    {% endfor -%}
+    {{ column }} = Column({{ map_sqlalchemy_type(column, data_type, enums) }}
+        {%- if column in primary_keys %}, primary_key=True
+        {%- elif column_default == 'gen_random_uuid()' %}, default=uuid.uuid4
+        {%- elif column_default == 'CURRENT_TIMESTAMP' %}, default=func.now()
+        {%- elif column_default and column in enums %}, default={{ enum_name }}.{{ column_default.split("'")[1] }}
+        {%- elif column_default %}, default={{ column_default }}
+        {%- endif %}
+        {%- if column == 'updated_at' %}, onupdate=func.now(){% endif %}
+        {%- if column in foreign_keys %}, ForeignKey('{{ foreign_keys[column] }}'){% endif %}
+        {%- if is_nullable == 'NO' %}, nullable=False{% endif %})
+    {% endfor %}
 
     {%- for fk_column, ref in foreign_keys.items() %}
     {% set foreign_table, foreign_column = ref.split('.') -%}
@@ -25,10 +29,7 @@ class {{ table_name.split('_')|map('capitalize')|join('') }}(Base):
     {%- endfor %}
 
     def __repr__(self):
-        return "<{{ table_name.capitalize() }}({{ repr_string }})>"
-
-    def __str__(self):
-        return str(self.__dict__)
+        return f"<{{ table_name.split('_')|map('capitalize')|join('') }}({{ columns|map(attribute='0')|join(', ') }})>"
 
     def to_dict(self):
         return {
@@ -36,5 +37,3 @@ class {{ table_name.split('_')|map('capitalize')|join('') }}(Base):
             "{{ column }}": self.{{ column }},
             {% endfor -%}
         }
-
-        

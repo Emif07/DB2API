@@ -1,4 +1,6 @@
-def map_sqlalchemy_type(pg_type: str) -> str:
+from typing import Dict
+
+def map_sqlalchemy_type(column_name: str, pg_type: str, enums: Dict[str, Dict[str, str]]) -> str:
     mapping = {
         "uuid": "UUID",
         "character varying": "String",
@@ -30,4 +32,10 @@ def map_sqlalchemy_type(pg_type: str) -> str:
         "tsvector": "TSVECTOR",
         # ... any other specific data types you use
     }
+    
+    # If the PostgreSQL type is 'USER-DEFINED', check if the column_name is one of the enums
+    if pg_type == 'USER-DEFINED' and column_name in enums:
+        enum_name = enums[column_name]["name"]
+        return f"Enum({enum_name})"
+    
     return mapping.get(pg_type, "String")  # Default to String if type not found

@@ -94,6 +94,8 @@ def main():
 
     logging.info("Database configuration is set!")
 
+    create_extensions_file(project_name)
+
     # Prompt user for table name or if they want to generate for all tables
     user_choice = input(
         "Do you want to generate structure for all tables? (yes/no): "
@@ -120,6 +122,29 @@ def main():
             # Generate structure for the table
             generate_api_structure_for_table(db_info, table_name, project_name)
             logging.info(f"Structure for table '{table_name}' has been successfully generated!")
+
+def create_extensions_file(project_name):
+    path = os.path.join("projects", project_name, "app", "database", "extensions.py")
+    
+    # Check if file already exists
+    if os.path.exists(path):
+        logging.info(f"'extensions.py' already exists. Skipping creation.")
+        return
+    
+    # Ensure the directory exists
+    directory = os.path.dirname(path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    
+    content = """\
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+"""
+    with open(path, 'w') as f:
+        f.write(content)
+    
+    logging.info(f"'extensions.py' has been created successfully!")
 
 if __name__ == "__main__":
     main()

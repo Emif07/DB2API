@@ -1,5 +1,5 @@
 from models import {{ table_name.split('_')|map('capitalize')|join('') }}
-from database import db_session  # Assuming you have a db_session or equivalent in your project
+from app.database.extensions import db
 
 class {{ table_name.split('_')|map('capitalize')|join('') }}Repository:
 
@@ -22,8 +22,8 @@ class {{ table_name.split('_')|map('capitalize')|join('') }}Repository:
     @staticmethod
     def create(data):
         new_item = {{ table_name.split('_')|map('capitalize')|join('') }}(**data)
-        db_session.add(new_item)
-        db_session.commit()
+        db.session.add(new_item)
+        db.session.commit()
         return new_item
 
     @staticmethod
@@ -32,13 +32,13 @@ class {{ table_name.split('_')|map('capitalize')|join('') }}Repository:
         if item:
             for key, value in data.items():
                 setattr(item, key, value)
-            db_session.commit()
+            db.session.commit()
         return item
 
     @staticmethod
     def delete(id):
         item = {{ table_name.split('_')|map('capitalize')|join('') }}.query.get(id)
         if item:
-            db_session.delete(item)
-            db_session.commit()
+            db.session.delete(item)
+            db.session.commit()
         return item
