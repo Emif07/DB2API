@@ -12,6 +12,9 @@ class {{ table_name.split('_')|map('capitalize')|join('') }}(db.Model):
 
     {% for column, data_type, is_nullable, column_default in columns -%}
     {{ column }} = Column({{ map_sqlalchemy_type(column, data_type, enums) }}
+        {% set sqlalchemy_type = map_sqlalchemy_type(column, data_type, enums) %}
+        {{ sqlalchemy_type }}
+        {%- if sqlalchemy_type == "String" and length %}({{ length }}){% endif %}
         {%- if column in primary_keys %}, primary_key=True
         {%- elif column_default == 'gen_random_uuid()' %}, default=uuid.uuid4
         {%- elif column_default == 'CURRENT_TIMESTAMP' %}, default=func.now()

@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from services import {{ table_name.split('_')|map('capitalize')|join('') }}Service
-from repositories import {{ table_name.split('_')|map('capitalize')|join('') }}Repository
+from ..services import {{ table_name.split('_')|map('capitalize')|join('') }}Service
+from ..repositories import {{ table_name.split('_')|map('capitalize')|join('') }}Repository
 
 {{ table_name_lower }}_bp = Blueprint('{{ table_name_lower }}', __name__)
 {{ table_name_lower }}_repo = {{ table_name.split('_')|map('capitalize')|join('') }}Repository()

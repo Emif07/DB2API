@@ -1,4 +1,4 @@
-from models import {{ table_name.split('_')|map('capitalize')|join('') }}
+from ..models import {{ table_name.split('_')|map('capitalize')|join('') }}
 from app.database.extensions import db
 
 class {{ table_name.split('_')|map('capitalize')|join('') }}Repository:

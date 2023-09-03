@@ -2,3 +2,4 @@ psycopg2-binary
 jinja2
 cryptography
 Flask_SQLAlchemy
+flask_sqlacodegen
