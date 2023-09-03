@@ -17,11 +17,11 @@ class DatabaseConnector:
         - Connection object.
         """
         return psycopg2.connect(
-            host=db_info["host"],
-            port=db_info["port"],
-            user=db_info["username"],
-            password=db_info["password"],
-            dbname=db_info["dbname"]
+            user=db_info["db_username"],
+            password=db_info["db_password"],
+            host=db_info["db_host"],
+            port=db_info["db_port"],
+            dbname=db_info["db_name"]
         )
 
     def execute_query(self, query: str, params: Tuple = ()) -> List[Tuple]:

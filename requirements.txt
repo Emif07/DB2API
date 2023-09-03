@@ -3,3 +3,4 @@ jinja2
 cryptography
 Flask_SQLAlchemy
 flask_sqlacodegen
+prompt_toolkit

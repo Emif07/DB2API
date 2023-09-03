@@ -11,9 +11,9 @@ def get_db_config_path(project_name: str) -> str:
 
 
 def save_db_info(project_name: str, db_info: Dict[str, str]) -> None:
-    key = load_key()
-    encrypted_password = encrypt_password(db_info["password"], key)
-    db_info["password"] = encrypted_password
+    # key = load_key()
+    # encrypted_password = encrypt_password(db_info["db_password"], key)
+    # db_info["db_password"] = encrypted_password
     write_file(get_db_config_path(project_name), json.dumps(db_info))
 
 
@@ -26,8 +26,8 @@ def load_db_info(project_name: str) -> Dict[str, str]:
     content = read_file(get_db_config_path(project_name))
     db_info = json.loads(content)
 
-    key = load_key()
-    decrypted_password = decrypt_password(db_info["password"], key)
-    db_info["password"] = decrypted_password
+    # key = load_key()
+    # decrypted_password = decrypt_password(db_info["db_password"], key)
+    # db_info["db_password"] = decrypted_password
 
     return db_info

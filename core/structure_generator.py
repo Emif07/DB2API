@@ -157,10 +157,10 @@ def transform_model_content(content):
     return content.strip()
 
 def generate_model_for_database(db_info: Dict[str, str], project_name: str):
-    logging.info(f"Generating model for table {db_info['dbname']} in project {project_name}")
+    logging.info(f"Generating model for table {db_info['db_name']} in project {project_name}")
     
     # Construct the database URL from the db_info dictionary
-    database_url = f"postgresql://{db_info['username']}:{db_info['password']}@{db_info['host']}:{db_info['port']}/{db_info['dbname']}"
+    database_url = f"postgresql://{db_info['db_username']}:{db_info['db_password']}@{db_info['db_host']}:{db_info['db_port']}/{db_info['db_name']}"
 
     # Use the file_path_for function to get the path for the model
     output_file = f"projects/{project_name}/app/models/all_tables.txt"
@@ -251,7 +251,7 @@ def generate_service_for_table(table_name: str, project_name: str, template_type
 # ============================
 
 def generate_api_structure_for_table(db_info: Dict[str, str], table_name: str, project_name: str):
-    logging.debug(f"Generating API structure for table {table_name} in project {project_name}")
+    logging.info(f"Generating API structure for table {table_name} in project {project_name}")
 
     # Generate controller for the table
     generate_controller_for_table(table_name, project_name)
@@ -283,7 +283,6 @@ def create_run_py(project_name):
 
     # Render the template with the imports and registrations
     run_content = template.render(imports=imports, registrations=registrations)
-
     run_py_path = os.path.join("projects", project_name, "run.py")
     
     # Write the rendered content to run.py
